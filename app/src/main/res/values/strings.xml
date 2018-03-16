@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">NUTS</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="school_news">校園動態</string>
+    <string name="ptt_hot">PTT 熱門文章</string>
+    <string name="lottery">抽籤囉！</string>
+</resources>
