@@ -2,17 +2,60 @@ package com.nuts.nuts;
 /* Created by petingo on 2018/2/9. */
 
 import android.content.Context;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import java.lang.annotation.AnnotationTypeMismatchException;
+
 public class AnimateManager {
     private Context context;
-    public Animation slide_down;
-    public Animation slide_up;
+    Animation slideDown;
+    Animation slideUp;
+    Animation slideLeftAppear;
+    Animation slideLeftDisappear;
+    Animation slideRightAppear;
+    Animation slideRightDisappear;
 
     AnimateManager(Context context) {
         this.context = context;
-        slide_down = AnimationUtils.loadAnimation(this.context, R.anim.slide_down);
-        slide_up = AnimationUtils.loadAnimation(this.context, R.anim.slide_up);
+        slideDown = AnimationUtils.loadAnimation(this.context, R.anim.slide_down);
+        slideUp = AnimationUtils.loadAnimation(this.context, R.anim.slide_up);
+        slideLeftAppear = AnimationUtils.loadAnimation(this.context, R.anim.slide_left_appear);
+        slideLeftDisappear = AnimationUtils.loadAnimation(this.context, R.anim.slide_left_disappear);
+        slideRightAppear = AnimationUtils.loadAnimation(this.context, R.anim.slide_right_appear);
+        slideRightDisappear = AnimationUtils.loadAnimation(this.context, R.anim.slide_right_disappear);
+
     }
+    void nextStep(View A, View B){
+        if(A != null) {
+            A.startAnimation(slideDown);
+            A.setVisibility(View.GONE);
+        }
+        if(B != null) {
+            B.setVisibility(View.VISIBLE);
+            B.startAnimation(slideUp);
+        }
+    }
+    void leftSlide(View A, View B){
+        if(A != null) {
+            A.startAnimation(slideLeftDisappear);
+            A.setVisibility(View.GONE);
+        }
+        if(B != null) {
+            B.setVisibility(View.VISIBLE);
+            B.startAnimation(slideLeftAppear);
+        }
+    }
+    void rightSlide(View A, View B){
+        if(A != null) {
+            A.startAnimation(slideRightDisappear);
+            A.setVisibility(View.GONE);
+        }
+        if(B != null) {
+            B.setVisibility(View.VISIBLE);
+            B.startAnimation(slideRightAppear);
+        }
+    }
+
 }

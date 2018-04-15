@@ -15,12 +15,12 @@ import java.util.Date;
 public class TagInfoListAdapter extends BaseAdapter {
     private Context context;
     private LayoutInflater inflater;
-    private ArrayList<TagInfoItem> tagInfoItemArrayList;
+    private ArrayList<TagInfoEvent> tagInfoEventArrayList;
 
-    TagInfoListAdapter(Context c, ArrayList<TagInfoItem> tagInfoItemArrayList) {
+    TagInfoListAdapter(Context c, ArrayList<TagInfoEvent> tagInfoEventArrayList) {
         this.inflater = LayoutInflater.from(c);
         this.context = c;
-        this.tagInfoItemArrayList = tagInfoItemArrayList;
+        this.tagInfoEventArrayList = tagInfoEventArrayList;
     }
 
     private class ViewHolder {
@@ -39,23 +39,23 @@ public class TagInfoListAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return tagInfoItemArrayList.size();
+        return tagInfoEventArrayList.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return tagInfoItemArrayList.get(i);
+        return tagInfoEventArrayList.get(i);
     }
 
     @Override
     public long getItemId(int i) {
-        return tagInfoItemArrayList.indexOf(getItem(i));
+        return tagInfoEventArrayList.indexOf(getItem(i));
     }
 
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
         ViewHolder holder = null;
-        final TagInfoItem tagInfoItem = (TagInfoItem) getItem(position);
+        final TagInfoEvent tagInfoEvent = (TagInfoEvent) getItem(position);
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.tag_info_list_item, null);
             ImageButton agree = (ImageButton) convertView.findViewById(R.id.imageButtonAgree);
@@ -66,7 +66,7 @@ public class TagInfoListAdapter extends BaseAdapter {
                 public void onClick(View v) {
                     TextView agreeNum = finalConvertView.findViewById(R.id.textViewAgreeNum);
                     addNum(agreeNum);
-                    //Talk to Server
+                    //TODO Talk to Server
                 }
             });
             disagree.setOnClickListener(new View.OnClickListener() {
@@ -86,10 +86,10 @@ public class TagInfoListAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        holder.title.setText(tagInfoItem.getTitle());
-        holder.time.setText(getDate(tagInfoItem.getTimestamp()));
-        holder.agreeNum.setText(tagInfoItem.getAgreeNum());
-        holder.disagreeNum.setText(tagInfoItem.getDisagreeNum());
+        holder.title.setText(tagInfoEvent.getTitle());
+        holder.time.setText(getDate(tagInfoEvent.getTime()));
+        holder.agreeNum.setText(tagInfoEvent.getAgreeNum());
+        holder.disagreeNum.setText(tagInfoEvent.getDisagreeNum());
         return convertView;
     }
 
