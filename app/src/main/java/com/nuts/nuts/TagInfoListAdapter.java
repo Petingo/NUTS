@@ -87,19 +87,14 @@ public class TagInfoListAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.title.setText(tagInfoEvent.getTitle());
-        holder.time.setText(getDate(tagInfoEvent.getTime()));
-        holder.agreeNum.setText(tagInfoEvent.getAgreeNum());
-        holder.disagreeNum.setText(tagInfoEvent.getDisagreeNum());
+        holder.time.setText(tagInfoEvent.getTime());
+        holder.agreeNum.setText(String.valueOf(tagInfoEvent.getAgreeNum()));
+        holder.disagreeNum.setText(String.valueOf(tagInfoEvent.getDisagreeNum()));
         return convertView;
     }
 
     public void addNum(TextView tv) {
         tv.setText(Integer.valueOf(tv.getText().toString()) + 1);
     }
-
-    private String getDate(String timeStamp) {
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd hh:mm");
-        Date netDate = (new Date(timeStamp));
-        return sdf.format(netDate);
-    }
+    
 }

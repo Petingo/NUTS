@@ -1,6 +1,7 @@
 package com.nuts.nuts;
 /* Created by petingo on 2018/3/14. */
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -22,7 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import javax.xml.transform.Result;
 
 public class Server {
-    private static final String ip = "http://petingo.ddns.net:8000";
+    private static final String ip = "http://" + "petingo.ddns.net" + ":8000";
 
     public static String get(final String app) {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -34,6 +35,8 @@ public class Server {
                     URL url = new URL(ip + app);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
+                    conn.setConnectTimeout(2000);
+                    conn.setReadTimeout(2000);
                     int statusCode = conn.getResponseCode();
                     Log.e("statusCode", String.valueOf(statusCode));
                     if (statusCode == 200) {
@@ -46,6 +49,9 @@ public class Server {
                             rawData.append(chunks);
                         }
                         data[0] = rawData.toString();
+                        latch.countDown();
+                    } else {
+                        data[0] = null;
                         latch.countDown();
                     }
                 } catch (Exception e) {
@@ -75,6 +81,8 @@ public class Server {
                     conn.setRequestProperty("Accept", "application/json");
                     conn.setDoOutput(true);
                     conn.setDoInput(true);
+                    conn.setConnectTimeout(2000);
+                    conn.setReadTimeout(2000);
 
                     DataOutputStream os = new DataOutputStream(conn.getOutputStream());
                     os.writeBytes(jsonParam.toString());
@@ -82,6 +90,7 @@ public class Server {
                     os.flush();
                     os.close();
 
+                    Log.e("app", app);
                     Log.e("STATUS", String.valueOf(conn.getResponseCode()));
                     Log.e("MSG", conn.getResponseMessage());
 

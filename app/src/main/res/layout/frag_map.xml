@@ -132,10 +132,11 @@
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/layoutDefault"
-        android:layout_width="match_parent"
+        android:layout_width="382dp"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent">
 
         <com.getbase.floatingactionbutton.FloatingActionsMenu
@@ -145,10 +146,11 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="16dp"
             android:layout_marginEnd="8dp"
             app:fab_addButtonColorNormal="@color/white"
             app:fab_addButtonColorPressed="@color/white_pressed"
+            app:fab_addButtonPlusIconColor="?android:attr/colorControlActivated"
             app:fab_addButtonSize="mini"
             app:fab_labelStyle="@style/menu_labels_style"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -219,9 +221,24 @@
             android:text="27 ℃"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
-            android:textSize="36sp"
+            android:textSize="48sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/weatherIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginTop="16dp"
+            android:padding="4dp"
+            android:shadowColor="@color/text_shadow"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="8"
+            app:layout_constraintEnd_toStartOf="@+id/textWeather"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/sun" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/buttonAddTag"
@@ -244,7 +261,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/common_google_signin_btn_text_light_default"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">

@@ -2,27 +2,21 @@ package com.nuts.nuts;
 /* Created by petingo on 2018/3/17. */
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -83,15 +77,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private TextView editMarkerPlaceName;
     private TextView weather;
     private TextView weatherPlace;
+    private EditText editTagTitle;
     private EditText editLocation;
     private AnimateManager mAnimateManager;
-    private Server server;
     private View top;
 
     private Marker tmpMarker;
 
     private boolean isChoosingLocation = false;
     private LatLng chosenLocation;
+    private boolean hasChosen = false;
 
     private int backSituation = 0;
     private final int BACK_NORMAL = 0;
@@ -111,6 +106,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         return view;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAnimateManager = new AnimateManager(context);
@@ -127,6 +123,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         cancel = view.findViewById(R.id.imageCancel);
         done = view.findViewById(R.id.imageDone);
         chooseLocation = view.findViewById(R.id.chooseLocation);
+        editTagTitle = view.findViewById(R.id.editTagTitle);
         editLocation = view.findViewById(R.id.editLocation);
         editMarkerPlaceName = view.findViewById(R.id.editMarkerPlaceName);
         tagInfoTitle = view.findViewById(R.id.textTagInfoTitle);
@@ -137,8 +134,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         toNTUST = view.findViewById(R.id.toNTUST);
         toNTU = view.findViewById(R.id.toNTU);
 
-        updateWeather();
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -146,6 +141,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         addTag.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // init following UIs
+                hasChosen = false;
+                placeName = "";
+                editLocation.setText("");
+                editTagTitle.setText("");
                 mAnimateManager.nextStep(layoutDefault, layoutTagCategory);
                 mAnimateManager.nextStep(null, chooseLocation);
                 top = layoutTagCategory;
@@ -163,13 +163,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         View.OnClickListener tagTypeListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mAnimateManager.nextStep(layoutTagCategory, layoutEditMarker);
-                editMarkerPlaceName.setText(placeName);
-                top = layoutEditMarker;
-                if (tmpMarker != null) {
-                    tmpMarker.remove();
+                if (hasChosen == true) {
+                    mAnimateManager.nextStep(layoutTagCategory, layoutEditMarker);
+                    editMarkerPlaceName.setText(placeName);
+                    top = layoutEditMarker;
+                    if (tmpMarker != null) {
+                        tmpMarker.remove();
+                    }
+                    isChoosingLocation = false;
+                } else {
+                    Toast.makeText(getContext(), "請選擇地點！", Toast.LENGTH_SHORT).show();
                 }
-                isChoosingLocation = false;
             }
         };
         tagRoad.setOnClickListener(tagTypeListener);
@@ -187,7 +191,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         done.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO post to server
+                try {
+                    JSONObject tagInfo = new JSONObject();
+                    tagInfo.put("title", editTagTitle.getText().toString());
+                    tagInfo.put("coor_x", chosenLocation.longitude);
+                    tagInfo.put("coor_y", chosenLocation.latitude);
+
+                    Server.post("/map/event", tagInfo);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 mAnimateManager.nextStep(layoutEditMarker, layoutDefault);
                 top = layoutDefault;
             }
@@ -213,72 +226,93 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void updateWeather() {
-        Server.get("/weather/get");
-        String temperature = "27";
-        String degree = "℃";
-        SpannableString ssTemperature = new SpannableString(temperature);
-        SpannableString ssDegree = new SpannableString(degree);
-        ssTemperature.setSpan(new RelativeSizeSpan(1.5f), 0, temperature.length(), 0); // set size
-        CharSequence finalText = TextUtils.concat(ssTemperature, " ", ssDegree);
-        weather.setText(finalText);
+        if(Server.get("/weather/get")!=null) {
+            String temperature = "23";
+            String degree = "℃";
+            SpannableString ssTemperature = new SpannableString(temperature);
+            SpannableString ssDegree = new SpannableString(degree);
+            ssDegree.setSpan(new RelativeSizeSpan(0.5f), 0, 1, 0);
+            final CharSequence finalText = TextUtils.concat(ssTemperature, " ", ssDegree);
+            weather.post(new Runnable() {
+                @Override
+                public void run() {
+                    weather.setText(finalText);
+                }
+            });
+        }
     }
 
     private void updateMarkers() {
-        tagInfoArrayList = new ArrayList<TagInfo>();
-        markerArrayList = new ArrayList<Marker>();
-        try {
-            JSONArray markersData = new JSONArray(Server.get("/map/dump"));
-            for (int i = 0; i < markersData.length(); i++) {
-                JSONObject data = markersData.getJSONObject(i);
-                JSONArray eventsData = data.getJSONArray("events");
-                ArrayList<TagInfoEvent> events = new ArrayList<>();
-                for (int k = 0; k < eventsData.length(); k++) {
-                    JSONObject eventData = eventsData.getJSONObject(k);
-                    String title = eventData.getString("title");
-                    String time = eventData.getString("time");
-                    int agreeNum = eventData.getInt("num_like");
-                    int disagreeNum = eventData.getInt("num_dislike");
-                    events.add(new TagInfoEvent(title, time, agreeNum, disagreeNum));
-                }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                tagInfoArrayList = new ArrayList<TagInfo>();
+                markerArrayList = new ArrayList<Marker>();
+                try {
+                    String rawData = Server.get("/map/dump");
+                    if(rawData!=null) {
+                        JSONArray markersData = new JSONArray(rawData);
+                        for (int i = 0; i < markersData.length(); i++) {
+                            JSONObject data = markersData.getJSONObject(i);
+                            JSONArray eventsData = data.getJSONArray("events");
+                            ArrayList<TagInfoEvent> events = new ArrayList<>();
+                            for (int k = 0; k < eventsData.length(); k++) {
+                                JSONObject eventData = eventsData.getJSONObject(k);
+                                String title = eventData.getString("title");
+                                String time = eventData.getString("time");
+                                int agreeNum = eventData.getInt("num_like");
+                                int disagreeNum = eventData.getInt("num_dislike");
+                                events.add(new TagInfoEvent(title, time, agreeNum, disagreeNum));
+                            }
 
-                String title = data.getString("location");
-                LatLng position = new LatLng(data.getDouble("y_cen"), data.getDouble("x_cen"));
-                tagInfoArrayList.add(new TagInfo(i, title, position, events));
+                            String title = data.getString("location");
+                            LatLng position = new LatLng(data.getDouble("y_cen"), data.getDouble("x_cen"));
+                            tagInfoArrayList.add(new TagInfo(i, title, position, events));
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                for (int i = 0; i < tagInfoArrayList.size(); i++) {
+                    TagInfo tagInfo = tagInfoArrayList.get(i);
+                    if (tagInfo.getTagInfoEvents().size() > 0) {
+                        Marker marker = mMap.addMarker(new MarkerOptions()
+                                .position(tagInfo.getPosition())
+                                .title(tagInfo.getTitle())
+                                .icon(BitmapDescriptorFactory.fromBitmap(util.getBitmap(getContext(), R.drawable.ic_marker_red))));
+                        marker.setTag(tagInfo.getTagInfoEvents());
+                        markerArrayList.add(marker);
+                    }
+                }
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        for (int i = 0; i < tagInfoArrayList.size(); i++) {
-            TagInfo tagInfo = tagInfoArrayList.get(i);
-            if(tagInfo.getTagInfoEvents().size() > 0) {
-                Marker marker = mMap.addMarker(new MarkerOptions()
-                        .position(tagInfo.getPosition())
-                        .title(tagInfo.getTitle())
-                        .icon(BitmapDescriptorFactory.fromBitmap(util.getBitmap(getContext(), R.drawable.ic_marker_red))));
-                marker.setTag(i);
-                markerArrayList.add(marker);
-            }
-        }
+        }).run();
     }
 
 
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (isChoosingLocation) {
+            Log.e("marker", "isChoosing");
             chosenLocation = marker.getPosition();
             return false;
         }
         if (marker == tmpMarker) {
+            Log.e("marker", "tmpMarker");
             return false;
         }
+
+        Log.e("marker", "normal");
         tagInfoTitle.setText(marker.getTitle());
 
-        ListView tagInfoList = (ListView) getActivity().findViewById(R.id.listViewTagInfo);
-        ArrayList events = tagInfoArrayList.get(Integer.valueOf(marker.getTag().toString())).getTagInfoEvents();
+        ListView tagInfoList = getActivity().findViewById(R.id.listViewTagInfo);
+//        ArrayList events = tagInfoArrayList.get(Integer.valueOf(marker.getTag().toString())).getTagInfoEvents();
+        ArrayList events = (ArrayList) marker.getTag();
         TagInfoListAdapter adapter = new TagInfoListAdapter(getActivity(), events);
         tagInfoList.setAdapter(adapter);
 
+        layoutTagInfo.setVisibility(View.VISIBLE);
         mAnimateManager.nextStep(null, layoutTagInfo);
         top = layoutTagInfo;
 
@@ -291,7 +325,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void postWeather(String weather) {
         try {
             JSONObject weatherJsonParam = new JSONObject();
-            weatherJsonParam.put("user_id", "11111");
+            weatherJsonParam.put("user_id", "1111");
             weatherJsonParam.put("weather", weather);
             Server.post("/user/vote", weatherJsonParam);
         } catch (JSONException e) {
@@ -302,14 +336,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        updateMarkers();
+        new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void run() {
+                Log.e("now", "updateWeather");
+                updateWeather();
+                Log.e("now", "updateMarkers");
+                updateMarkers();
+                Log.e("finish", "loading");
+            }
+        }).run();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             showAccessFineLocationPermission();
             return;
         }
-        
+        Log.e("now", "setMyLocation");
         mMap.setMyLocationEnabled(true);
         mFusedLocationClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
             @Override
@@ -338,7 +382,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         toNTUST.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LatLng NTU = new LatLng(25.0132864,121.5417808);
+                LatLng NTU = new LatLng(25.0132864, 121.5417808);
                 CameraPosition.Builder builder = new CameraPosition.Builder();
                 builder.zoom(16.7f);
                 builder.target(NTU);
@@ -348,7 +392,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         toNTNU.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LatLng NTU = new LatLng(25.0261724,121.5274881);
+                LatLng NTU = new LatLng(25.0261724, 121.5274881);
                 CameraPosition.Builder builder = new CameraPosition.Builder();
                 builder.zoom(16.7f);
                 builder.target(NTU);
@@ -358,6 +402,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         toMyPlace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    showAccessFineLocationPermission();
+                    return;
+                }
                 mFusedLocationClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
@@ -380,16 +428,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     if (tmpMarker != null) {
                         tmpMarker.remove();
                     }
-                    chosenLocation = latLng;
                     placeName = Server.getPlaceName(latLng);
-                    if (placeName == null) {
+                    if (placeName.equals("None") || placeName == null) {
                         placeName = "化外之地";
+                    } else {
+                        chosenLocation = latLng;
+                        hasChosen = true;
                     }
                     editLocation.setText(placeName);
                     tmpMarker = mMap.addMarker(new MarkerOptions()
                             .position(latLng)
                             .title(placeName)
                             .icon(BitmapDescriptorFactory.fromBitmap(util.getBitmap(getContext(), R.drawable.ic_marker_red))));
+                    chosenLocation = latLng;
                     return;
                 }
 
@@ -402,7 +453,38 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             }
         });
 
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                if (isChoosingLocation) {
+                    Log.e("marker", "isChoosing");
+                    chosenLocation = marker.getPosition();
+                    return false;
+                }
+                if (marker == tmpMarker) {
+                    Log.e("marker", "tmpMarker");
+                    return false;
+                }
 
+                Log.e("marker", "normal");
+                tagInfoTitle.setText(marker.getTitle());
+
+                ListView tagInfoList = getActivity().findViewById(R.id.listViewTagInfo);
+//        ArrayList events = tagInfoArrayList.get(Integer.valueOf(marker.getTag().toString())).getTagInfoEvents();
+                ArrayList events = (ArrayList) marker.getTag();
+                TagInfoListAdapter adapter = new TagInfoListAdapter(getActivity(), events);
+                tagInfoList.setAdapter(adapter);
+
+                layoutTagInfo.setVisibility(View.VISIBLE);
+                mAnimateManager.nextStep(top, layoutTagInfo);
+                top = layoutTagInfo;
+
+                // Return false to indicate that we have not consumed the event and that we wish
+                // for the default behavior to occur (which is for the camera to move such that the
+                // marker is centered and for the marker's info window to open, if it has one).
+                return false;
+            }
+        });
     }
 
     private void showAccessFineLocationPermission() {
