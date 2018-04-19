@@ -199,6 +199,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     tagInfo.put("coor_y", chosenLocation.latitude);
 
                     Server.post("/map/event", tagInfo);
+
+                    updateMarkers();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -231,7 +233,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void updateWeather() {
         weatherIcon.setImageBitmap(util.getBitmap(context, R.drawable.ic_cloud));
         String result = Server.get("/weather/get");
-        if(result != null) {
+        if (result != null) {
             String temperature = "24";
             String degree = "℃";
             SpannableString ssTemperature = new SpannableString(temperature);
@@ -250,9 +252,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 int sun = jsonObject.getInt("sun");
                 int rain = jsonObject.getInt("rain");
                 int cloud = jsonObject.getInt("rain");
-                if(sun > rain && sun > cloud){
+                if (sun > rain && sun > cloud) {
                     weatherIcon.setImageBitmap(util.getBitmap(context, R.drawable.ic_sun));
-                } else if (rain > sun && rain > cloud){
+                } else if (rain > sun && rain > cloud) {
                     weatherIcon.setImageBitmap(util.getBitmap(context, R.drawable.ic_rain));
                 } else {
                     weatherIcon.setImageBitmap(util.getBitmap(context, R.drawable.ic_cloud));
@@ -271,7 +273,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 markerArrayList = new ArrayList<Marker>();
                 try {
                     String rawData = Server.get("/map/dump");
-                    if(rawData!=null) {
+                    if (rawData != null) {
+                        for (int i = 0; i < markerArrayList.size(); i++) {
+                            markerArrayList.get(i).remove();
+                        }
                         JSONArray markersData = new JSONArray(rawData);
                         for (int i = 0; i < markersData.length(); i++) {
                             JSONObject data = markersData.getJSONObject(i);
@@ -298,7 +303,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 for (int i = 0; i < tagInfoArrayList.size(); i++) {
                     TagInfo tagInfo = tagInfoArrayList.get(i);
                     if (tagInfo.getTagInfoEvents().size() > 0) {
-                        Log.e("title",tagInfo.getTitle());
+                        Log.e("title", tagInfo.getTitle());
                         Marker marker = mMap.addMarker(new MarkerOptions()
                                 .position(tagInfo.getPosition())
                                 .title(tagInfo.getTitle())
