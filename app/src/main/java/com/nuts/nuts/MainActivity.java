@@ -19,13 +19,19 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    public static SharedPreferences pref;
     private View navHeader;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        pref = getSharedPreferences(getPackageName(), MODE_PRIVATE);
 
         showAskWeatherDialog();
 
@@ -42,6 +48,9 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navHeader = navigationView.getHeaderView(0);
         initNavHead();
+
+        Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+        startActivity(intent);
 
         try {
             Fragment fragment = null;
@@ -76,6 +85,17 @@ public class MainActivity extends AppCompatActivity
         drawerEmail.setText(pref.getString("account","guest"));
     }
 
+    private void postWeather(String weather) {
+        try {
+            JSONObject weatherJsonParam = new JSONObject();
+            weatherJsonParam.put("user_id", "1111");
+            weatherJsonParam.put("weather", weather);
+            Server.post("/user/vote", weatherJsonParam);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void showAskWeatherDialog(){
         LayoutInflater inflater = getLayoutInflater();
         final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -89,21 +109,21 @@ public class MainActivity extends AppCompatActivity
         sun.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO send
+                postWeather("sun");
                 dialog.cancel();
             }
         });
         rain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO send
+                postWeather("rain");
                 dialog.cancel();
             }
         });
         cloud.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO send
+                postWeather("cloud");
                 dialog.cancel();
             }
         });
@@ -152,7 +172,6 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

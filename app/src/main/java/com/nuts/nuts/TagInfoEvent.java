@@ -2,7 +2,8 @@ package com.nuts.nuts;
 /* Created by petingo on 2018/3/4. */
 
 public class TagInfoEvent {
-    public TagInfoEvent(String title, String time, int agreeNum, int disagreeNum) {
+    public TagInfoEvent(int id, String title, String time, int agreeNum, int disagreeNum) {
+        this.id = id;
         this.title = title;
         this.time = time;
         this.agreeNum = agreeNum;
@@ -25,6 +26,11 @@ public class TagInfoEvent {
         return disagreeNum;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    private int id;
     private String title;
     private String time;
     private int agreeNum;

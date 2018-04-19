@@ -6,7 +6,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
+import android.widget.SearchView;
 import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -66,7 +70,7 @@ public class TagInfoListAdapter extends BaseAdapter {
                 public void onClick(View v) {
                     TextView agreeNum = finalConvertView.findViewById(R.id.textViewAgreeNum);
                     addNum(agreeNum);
-                    //TODO Talk to Server
+                    postLike(tagInfoEvent.getId(), 1);
                 }
             });
             disagree.setOnClickListener(new View.OnClickListener() {
@@ -74,6 +78,7 @@ public class TagInfoListAdapter extends BaseAdapter {
                 public void onClick(View v) {
                     TextView disagreeNum = finalConvertView.findViewById(R.id.textViewDisagreeNum);
                     addNum(disagreeNum);
+                    postLike(tagInfoEvent.getId(), 0);
                 }
             });
             holder = new ViewHolder(
@@ -92,7 +97,20 @@ public class TagInfoListAdapter extends BaseAdapter {
         holder.disagreeNum.setText(String.valueOf(tagInfoEvent.getDisagreeNum()));
         return convertView;
     }
-
+    // type : 1 => like
+    // type : 0 => dislike
+    public void postLike(int id, int like){
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("user_id", "1111");
+            jsonObject.put("id", id);
+            jsonObject.put("like", like);
+            jsonObject.put("dislike", like==1 ? 0:1);
+            Server.post("/map/change_comment",jsonObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
     public void addNum(TextView tv) {
         tv.setText(Integer.valueOf(tv.getText().toString()) + 1);
     }

@@ -23,7 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import javax.xml.transform.Result;
 
 public class Server {
-    private static final String ip = "http://" + "petingo.ddns.net" + ":8000";
+    private static final String ip = "http://nutsapp.herokuapp.com";
 
     public static String get(final String app) {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -48,6 +48,7 @@ public class Server {
                         while ((chunks = buff.readLine()) != null) {
                             rawData.append(chunks);
                         }
+                        Log.e("rawData",rawData.toString());
                         data[0] = rawData.toString();
                         latch.countDown();
                     } else {

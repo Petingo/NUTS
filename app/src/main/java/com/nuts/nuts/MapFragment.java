@@ -69,6 +69,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private ImageView cancel;
     private ImageView done;
     private ImageView chooseLocation;
+    private ImageView weatherIcon;
     private com.getbase.floatingactionbutton.FloatingActionButton toMyPlace;
     private com.getbase.floatingactionbutton.FloatingActionButton toNTNU;
     private com.getbase.floatingactionbutton.FloatingActionButton toNTU;
@@ -133,7 +134,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         toNTNU = view.findViewById(R.id.toNTNU);
         toNTUST = view.findViewById(R.id.toNTUST);
         toNTU = view.findViewById(R.id.toNTU);
-
+        weatherIcon = view.findViewById(R.id.weatherIcon);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -228,8 +229,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void updateWeather() {
-        if(Server.get("/weather/get")!=null) {
-            String temperature = "23";
+        weatherIcon.setImageBitmap(util.getBitmap(context, R.drawable.ic_cloud));
+        String result = Server.get("/weather/get");
+        if(result != null) {
+            String temperature = "24";
             String degree = "℃";
             SpannableString ssTemperature = new SpannableString(temperature);
             SpannableString ssDegree = new SpannableString(degree);
@@ -241,6 +244,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     weather.setText(finalText);
                 }
             });
+
+            try {
+                JSONObject jsonObject = new JSONObject(result);
+                int sun = jsonObject.getInt("sun");
+                int rain = jsonObject.getInt("rain");
+                int cloud = jsonObject.getInt("rain");
+                if(sun > rain && sun > cloud){
+                    weatherIcon.setImageBitmap(util.getBitmap(context, R.drawable.ic_sun));
+                } else if (rain > sun && rain > cloud){
+                    weatherIcon.setImageBitmap(util.getBitmap(context, R.drawable.ic_rain));
+                } else {
+                    weatherIcon.setImageBitmap(util.getBitmap(context, R.drawable.ic_cloud));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -260,11 +279,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             ArrayList<TagInfoEvent> events = new ArrayList<>();
                             for (int k = 0; k < eventsData.length(); k++) {
                                 JSONObject eventData = eventsData.getJSONObject(k);
+                                int id = eventData.getInt("id");
                                 String title = eventData.getString("title");
                                 String time = eventData.getString("time");
                                 int agreeNum = eventData.getInt("num_like");
                                 int disagreeNum = eventData.getInt("num_dislike");
-                                events.add(new TagInfoEvent(title, time, agreeNum, disagreeNum));
+                                events.add(new TagInfoEvent(id, title, time, agreeNum, disagreeNum));
                             }
 
                             String title = data.getString("location");
@@ -278,6 +298,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 for (int i = 0; i < tagInfoArrayList.size(); i++) {
                     TagInfo tagInfo = tagInfoArrayList.get(i);
                     if (tagInfo.getTagInfoEvents().size() > 0) {
+                        Log.e("title",tagInfo.getTitle());
                         Marker marker = mMap.addMarker(new MarkerOptions()
                                 .position(tagInfo.getPosition())
                                 .title(tagInfo.getTitle())
@@ -320,17 +341,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         // for the default behavior to occur (which is for the camera to move such that the
         // marker is centered and for the marker's info window to open, if it has one).
         return false;
-    }
-
-    private void postWeather(String weather) {
-        try {
-            JSONObject weatherJsonParam = new JSONObject();
-            weatherJsonParam.put("user_id", "1111");
-            weatherJsonParam.put("weather", weather);
-            Server.post("/user/vote", weatherJsonParam);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -429,7 +439,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                         tmpMarker.remove();
                     }
                     placeName = Server.getPlaceName(latLng);
-                    if (placeName.equals("None") || placeName == null) {
+                    if (placeName == null || placeName.equals("None")) {
                         placeName = "化外之地";
                     } else {
                         chosenLocation = latLng;

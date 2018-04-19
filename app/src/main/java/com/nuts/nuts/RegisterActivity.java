@@ -59,11 +59,22 @@ public class RegisterActivity extends Activity {
                 if(email.isEmpty() || password.isEmpty()){
                     Toast.makeText(RegisterActivity.this, "請輸入信箱及密碼！", Toast.LENGTH_SHORT).show();
                 } else {
+                    // for test
+                    if(password.equals("ip")){
+                        updateIP(email);
+                    }
                     updateAccountInfo("student",email);
                     finish();
                 }
             }
         });
+    }
+
+    void updateIP(String ip){
+        SharedPreferences pref = getSharedPreferences(getPackageName(), MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("ip", ip);
+        editor.apply();
     }
 
     void updateAccountInfo(String identity, String account){

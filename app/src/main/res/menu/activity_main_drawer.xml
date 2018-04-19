@@ -1,21 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_school"
-            android:icon="@drawable/ic_menu_camera"
+            android:icon="@drawable/ic_pin_drop_black_24dp"
             android:title="@string/school_news" />
         <item
             android:id="@+id/nav_ptt_hot"
-            android:icon="@drawable/ic_menu_gallery"
+            android:icon="@drawable/ic_whatshot_black_24dp"
             android:title="@string/ptt_hot" />
         <item
             android:id="@+id/nav_lottery"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/ic_restaurant_black_24dp"
             android:title="@string/lottery" />
+        <item />
+        <item
+            android:id="@+id/setting"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="設定" />
+        <item
+            android:id="@+id/info"
+            android:icon="@drawable/ic_info_black_24dp"
+            android:title="關於我們" />
+        <item
+            android:id="@+id/signout"
+            android:icon="@drawable/ic_arrow_back_black_24dp"
+            android:title="登出" />
     </group>
 
     <item
@@ -25,11 +39,13 @@
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:title="Share"
+                android:visible="false" />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:title="Send"
+                android:visible="false" />
         </menu>
     </item>
 
