@@ -37,8 +37,6 @@ public class MainActivity extends AppCompatActivity
 
         pref = getSharedPreferences(getPackageName(), MODE_PRIVATE);
 
-        showAskWeatherDialog();
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -86,56 +84,6 @@ public class MainActivity extends AppCompatActivity
         drawerEmail.setText(pref.getString("account","guest"));
     }
 
-    private void postWeather(String weather) {
-        try {
-            JSONObject weatherJsonParam = new JSONObject();
-            weatherJsonParam.put("user_id", "1111");
-            weatherJsonParam.put("weather", weather);
-            Server.post("/user/vote", weatherJsonParam);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void showAskWeatherDialog(){
-        LayoutInflater inflater = getLayoutInflater();
-        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        View view = inflater.inflate(R.layout.ask_weather, null);
-        dialogBuilder.setView(view);
-        final AlertDialog dialog = dialogBuilder.create();
-        ImageView sun = view.findViewById(R.id.sun);
-        ImageView rain = view.findViewById(R.id.rain);
-        ImageView cloud = view.findViewById(R.id.cloud);
-        ImageView doNotKnow = view.findViewById(R.id.dontKnow);
-        sun.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                postWeather("sun");
-                dialog.cancel();
-            }
-        });
-        rain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                postWeather("rain");
-                dialog.cancel();
-            }
-        });
-        cloud.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                postWeather("cloud");
-                dialog.cancel();
-            }
-        });
-        doNotKnow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.cancel();
-            }
-        });
-        dialog.show();
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

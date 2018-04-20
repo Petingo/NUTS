@@ -377,17 +377,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         LatLng TW = new LatLng(25.0248956,121.5428653);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(TW));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(10f));
-        new Thread(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public void run() {
-                Log.e("now", "updateWeather");
-                updateWeather();
-                Log.e("now", "updateMarkers");
-                updateMarkers();
-                Log.e("finish", "loading");
-            }
-        }).run();
+
+        showAskWeatherDialog();
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -580,5 +572,73 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     private void requestPermission(String permissionName, int permissionRequestCode) {
         ActivityCompat.requestPermissions(getActivity(),
                 new String[]{permissionName}, permissionRequestCode);
+    }
+
+    private void postWeather(String weather) {
+        try {
+            JSONObject weatherJsonParam = new JSONObject();
+            weatherJsonParam.put("user_id", "1111");
+            weatherJsonParam.put("weather", weather);
+            Server.post("/user/vote", weatherJsonParam);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showAskWeatherDialog(){
+        LayoutInflater inflater = getLayoutInflater();
+        final android.app.AlertDialog.Builder dialogBuilder = new android.app.AlertDialog.Builder(getContext());
+        View view = inflater.inflate(R.layout.ask_weather, null);
+        dialogBuilder.setView(view);
+        final android.app.AlertDialog dialog = dialogBuilder.create();
+        ImageView sun = view.findViewById(R.id.sun);
+        ImageView rain = view.findViewById(R.id.rain);
+        ImageView cloud = view.findViewById(R.id.cloud);
+        ImageView doNotKnow = view.findViewById(R.id.dontKnow);
+        sun.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+                postWeather("sun");
+                init();
+            }
+        });
+        rain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+                postWeather("rain");
+                init();
+            }
+        });
+        cloud.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+                postWeather("cloud");
+                init();
+            }
+        });
+        doNotKnow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+                init();
+            }
+        });
+        dialog.show();
+    }
+    private void init(){
+        new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void run() {
+                Log.e("now", "updateWeather");
+                updateWeather();
+                Log.e("now", "updateMarkers");
+                updateMarkers();
+                Log.e("finish", "loading");
+            }
+        }).run();
     }
 }
