@@ -62,12 +62,21 @@ public class RegisterActivity extends Activity {
                     // for test
                     if(password.equals("ip")){
                         updateIP(email);
+                    } else if (password.equals("inter")){
+                        updateInterval(email);
                     }
                     updateAccountInfo("student",email);
                     finish();
                 }
             }
         });
+    }
+
+    void updateInterval(String val){
+        SharedPreferences pref = getSharedPreferences(getPackageName(), MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt("interval", Integer.valueOf(val));
+        editor.apply();
     }
 
     void updateIP(String ip){

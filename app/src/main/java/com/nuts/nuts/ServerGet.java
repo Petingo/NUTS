@@ -45,6 +45,5 @@ public class ServerGet extends AsyncTask<String, String, String> {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-        //Do anything with response..
     }
 }

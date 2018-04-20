@@ -52,13 +52,17 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent">
 
+            <Space
+                android:layout_width="25dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/buttonTagRestaurant"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:clickable="true"
-                android:foreground="@drawable/restaurant"
-                android:foregroundGravity="center"
+                android:src="@drawable/ic_restaurant_gray_24dp"
                 app:backgroundTint="@android:color/white" />
 
             <Space
@@ -67,13 +71,13 @@
                 android:layout_weight="1" />
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/buttonTagBike"
+                android:id="@+id/buttonTagActivity"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:layout_weight="1"
                 android:clickable="true"
-                android:foreground="@drawable/bike"
                 android:foregroundGravity="center"
+                android:src="@drawable/ic_people_gray_24dp"
                 app:backgroundTint="@android:color/white" />
 
             <Space
@@ -88,8 +92,8 @@
                 android:layout_marginBottom="24dp"
                 android:layout_weight="1"
                 android:clickable="true"
-                android:foreground="@drawable/road"
                 android:foregroundGravity="center"
+                android:src="@drawable/ic_roadblock_gray"
                 app:backgroundTint="@android:color/white" />
 
             <Space
@@ -106,6 +110,11 @@
                 android:foreground="@drawable/dumb_bird"
                 android:foregroundGravity="center"
                 app:backgroundTint="@android:color/white" />
+
+            <Space
+                android:layout_width="25dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
         </LinearLayout>
 
         <EditText
@@ -136,7 +145,6 @@
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent">
 
         <com.getbase.floatingactionbutton.FloatingActionsMenu
@@ -147,7 +155,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="16dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="16dp"
             app:fab_addButtonColorNormal="@color/white"
             app:fab_addButtonColorPressed="@color/white_pressed"
             app:fab_addButtonPlusIconColor="?android:attr/colorControlActivated"
@@ -199,6 +207,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
+            android:layout_marginTop="2dp"
             android:shadowColor="@color/text_shadow"
             android:shadowDx="2"
             android:shadowDy="2"
@@ -258,13 +267,29 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/placeIcon"
+            android:layout_width="11dp"
+            android:layout_height="16dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/ic_marker_white"
+            android:elevation="4dp"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4"
+            app:layout_constraintBottom_toBottomOf="@+id/textWeatherPlace"
+            app:layout_constraintEnd_toStartOf="@+id/textWeatherPlace"
+            app:layout_constraintTop_toTopOf="@+id/textWeatherPlace" />
+
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/layoutTagInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/common_google_signin_btn_text_light_default"
+        android:background="@color/map_hover_background"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -310,7 +335,7 @@
         android:id="@+id/layoutEditMarker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/common_google_signin_btn_text_light_default"
+        android:background="@color/map_hover_background"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

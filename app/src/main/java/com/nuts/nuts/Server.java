@@ -131,11 +131,6 @@ public class Server {
                     writer.write(jsonParam.toString());
                     writer.close();
 
-//                    DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-//                    os.writeBytes(jsonParam.toString().getBytes().toString());
-//                    os.flush();
-//                    os.close();
-
                     Log.e("app", app);
                     Log.e("STATUS", String.valueOf(conn.getResponseCode()));
                     Log.e("MSG", conn.getResponseMessage());

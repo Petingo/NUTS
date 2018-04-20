@@ -5,11 +5,13 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -68,7 +70,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     private ConstraintLayout layoutTagCategory;
     private FloatingActionButton addTag;
     private FloatingActionButton tagRoad;
-    private FloatingActionButton tagBike;
+    private FloatingActionButton tagActivity;
     private FloatingActionButton tagRestaurant;
     private FloatingActionButton tagOther;
     private ImageView cancel;
@@ -119,7 +121,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
         addTag = view.findViewById(R.id.buttonAddTag);
         tagRoad = view.findViewById(R.id.buttonTagRoad);
-        tagBike = view.findViewById(R.id.buttonTagBike);
+        tagActivity = view.findViewById(R.id.buttonTagActivity);
         tagRestaurant = view.findViewById(R.id.buttonTagRestaurant);
         tagOther = view.findViewById(R.id.buttonTagOther);
         layoutEditMarker = view.findViewById(R.id.layoutEditMarker);
@@ -166,26 +168,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             }
         });
 
-        View.OnClickListener tagTypeListener = new View.OnClickListener() {
+        tagRoad.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (hasChosen) {
-                    mAnimateManager.nextStep(layoutTagCategory, layoutEditMarker);
-                    editMarkerPlaceName.setText(placeName);
-                    top = layoutEditMarker;
-                    if (tmpMarker != null) {
-                        tmpMarker.remove();
-                    }
-                    isChoosingLocation = false;
-                } else {
-                    Toast.makeText(getContext(), "請選擇地點！", Toast.LENGTH_SHORT).show();
-                }
+                editTagTitle.setText("[交通] ");
+                categoryClick();
             }
-        };
-        tagRoad.setOnClickListener(tagTypeListener);
-        tagBike.setOnClickListener(tagTypeListener);
-        tagRestaurant.setOnClickListener(tagTypeListener);
-        tagOther.setOnClickListener(tagTypeListener);
+        });
+        tagActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editTagTitle.setText("[活動] ");
+                categoryClick();
+            }
+        });
+        tagRestaurant.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editTagTitle.setText("[飲食] ");
+                categoryClick();
+            }
+        });
+        tagOther.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editTagTitle.setText("[生活] ");
+                categoryClick();
+            }
+        });
 
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -242,6 +252,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 return false;
             }
         });
+    }
+
+    private void categoryClick(){
+        if (hasChosen) {
+            mAnimateManager.nextStep(layoutTagCategory, layoutEditMarker);
+            editMarkerPlaceName.setText(placeName);
+            top = layoutEditMarker;
+            if (tmpMarker != null) {
+                tmpMarker.remove();
+            }
+            isChoosingLocation = false;
+        } else {
+            Toast.makeText(getContext(), "請選擇地點！", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -338,39 +362,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         }).run();
     }
 
-
-//    @Override
-//    public boolean onMarkerClick(Marker marker) {
-//        if (isChoosingLocation) {
-//            Log.e("marker", "isChoosing");
-//            chosenLocation = marker.getPosition();
-//            hasChosen = true;
-//            return false;
-//        }
-//        if (marker == tmpMarker) {
-//            Log.e("marker", "tmpMarker");
-//            return false;
-//        }
-//
-//        Log.e("marker", "normal");
-//        tagInfoTitle.setText(marker.getTitle());
-//
-//        ListView tagInfoList = getActivity().findViewById(R.id.listViewTagInfo);
-////        ArrayList events = tagInfoArrayList.get(Integer.valueOf(marker.getTag().toString())).getTagInfoEvents();
-//        ArrayList events = (ArrayList) marker.getTag();
-//        TagInfoListAdapter adapter = new TagInfoListAdapter(getActivity(), events);
-//        tagInfoList.setAdapter(adapter);
-//
-//        layoutTagInfo.setVisibility(View.VISIBLE);
-//        mAnimateManager.nextStep(null, layoutTagInfo);
-//        top = layoutTagInfo;
-//
-//        // Return false to indicate that we have not consumed the event and that we wish
-//        // for the default behavior to occur (which is for the camera to move such that the
-//        // marker is centered and for the marker's info window to open, if it has one).
-//        return false;
-//    }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -405,6 +396,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         toNTU.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                weatherPlace.setText("台大校總區");
                 LatLng NTU = new LatLng(25.0170248, 121.5397557);
                 CameraPosition.Builder builder = new CameraPosition.Builder();
                 builder.zoom(15);
@@ -415,6 +407,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         toNTUST.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                weatherPlace.setText("台科大");
                 LatLng NTU = new LatLng(25.0132864, 121.5417808);
                 CameraPosition.Builder builder = new CameraPosition.Builder();
                 builder.zoom(16.7f);
@@ -425,6 +418,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         toNTNU.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                weatherPlace.setText("師大");
                 LatLng NTU = new LatLng(25.0261724, 121.5274881);
                 CameraPosition.Builder builder = new CameraPosition.Builder();
                 builder.zoom(16.7f);
@@ -521,6 +515,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 return false;
             }
         });
+
+        // update marker every n second
+        // Init
+        final SharedPreferences pref = context.getSharedPreferences(context.getPackageName(),Context.MODE_PRIVATE);
+        final int interval = pref.getInt("interval", 5000);
+        final Handler handler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                Log.e("updateMarkers","start");
+                updateMarkers();
+                handler.postDelayed(this, interval);
+            }
+        };
+        handler.postDelayed(runnable, interval);
+
     }
 
     private void showAccessFineLocationPermission() {
