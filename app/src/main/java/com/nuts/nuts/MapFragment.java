@@ -4,10 +4,12 @@ package com.nuts.nuts;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -34,6 +36,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -50,10 +53,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback{
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -164,7 +169,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         View.OnClickListener tagTypeListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (hasChosen == true) {
+                if (hasChosen) {
                     mAnimateManager.nextStep(layoutTagCategory, layoutEditMarker);
                     editMarkerPlaceName.setText(placeName);
                     top = layoutEditMarker;
@@ -194,13 +199,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             public void onClick(View view) {
                 try {
                     JSONObject tagInfo = new JSONObject();
-                    tagInfo.put("title", editTagTitle.getText().toString());
+                    tagInfo.put("title",editTagTitle.getText().toString());
+                    Log.e("converted Title", tagInfo.getString("title"));
                     tagInfo.put("coor_x", chosenLocation.longitude);
                     tagInfo.put("coor_y", chosenLocation.latitude);
-
+                    Log.e("title", editTagTitle.getText().toString());
+                    Log.e("x", String.valueOf(chosenLocation.longitude));
+                    Log.e("x", String.valueOf(chosenLocation.latitude));
                     Server.post("/map/event", tagInfo);
-
-                    updateMarkers();
+                    new CountDownTimer(1000, 1000) {
+                        @Override
+                        public void onFinish() {
+                            updateMarkers();
+                        }
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+                        }
+                    }.start();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -233,6 +248,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void updateWeather() {
         weatherIcon.setImageBitmap(util.getBitmap(context, R.drawable.ic_cloud));
         String result = Server.get("/weather/get");
+//        String result = new ServerGet.execute(); execute("/weather/get");
         if (result != null) {
             String temperature = "24";
             String degree = "℃";
@@ -275,8 +291,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     String rawData = Server.get("/map/dump");
                     if (rawData != null) {
                         for (int i = 0; i < markerArrayList.size(); i++) {
+                            Log.e("remove", markerArrayList.get(i).getTitle());
                             markerArrayList.get(i).remove();
                         }
+                        for(int i = 0 ; i< tagInfoArrayList.size();i++){
+                            tagInfoArrayList.clear();
+                        }
+                        markerArrayList.clear();
+                        mMap.clear();
                         JSONArray markersData = new JSONArray(rawData);
                         for (int i = 0; i < markersData.length(); i++) {
                             JSONObject data = markersData.getJSONObject(i);
@@ -317,40 +339,44 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
 
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        if (isChoosingLocation) {
-            Log.e("marker", "isChoosing");
-            chosenLocation = marker.getPosition();
-            return false;
-        }
-        if (marker == tmpMarker) {
-            Log.e("marker", "tmpMarker");
-            return false;
-        }
-
-        Log.e("marker", "normal");
-        tagInfoTitle.setText(marker.getTitle());
-
-        ListView tagInfoList = getActivity().findViewById(R.id.listViewTagInfo);
-//        ArrayList events = tagInfoArrayList.get(Integer.valueOf(marker.getTag().toString())).getTagInfoEvents();
-        ArrayList events = (ArrayList) marker.getTag();
-        TagInfoListAdapter adapter = new TagInfoListAdapter(getActivity(), events);
-        tagInfoList.setAdapter(adapter);
-
-        layoutTagInfo.setVisibility(View.VISIBLE);
-        mAnimateManager.nextStep(null, layoutTagInfo);
-        top = layoutTagInfo;
-
-        // Return false to indicate that we have not consumed the event and that we wish
-        // for the default behavior to occur (which is for the camera to move such that the
-        // marker is centered and for the marker's info window to open, if it has one).
-        return false;
-    }
+//    @Override
+//    public boolean onMarkerClick(Marker marker) {
+//        if (isChoosingLocation) {
+//            Log.e("marker", "isChoosing");
+//            chosenLocation = marker.getPosition();
+//            hasChosen = true;
+//            return false;
+//        }
+//        if (marker == tmpMarker) {
+//            Log.e("marker", "tmpMarker");
+//            return false;
+//        }
+//
+//        Log.e("marker", "normal");
+//        tagInfoTitle.setText(marker.getTitle());
+//
+//        ListView tagInfoList = getActivity().findViewById(R.id.listViewTagInfo);
+////        ArrayList events = tagInfoArrayList.get(Integer.valueOf(marker.getTag().toString())).getTagInfoEvents();
+//        ArrayList events = (ArrayList) marker.getTag();
+//        TagInfoListAdapter adapter = new TagInfoListAdapter(getActivity(), events);
+//        tagInfoList.setAdapter(adapter);
+//
+//        layoutTagInfo.setVisibility(View.VISIBLE);
+//        mAnimateManager.nextStep(null, layoutTagInfo);
+//        top = layoutTagInfo;
+//
+//        // Return false to indicate that we have not consumed the event and that we wish
+//        // for the default behavior to occur (which is for the camera to move such that the
+//        // marker is centered and for the marker's info window to open, if it has one).
+//        return false;
+//    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        LatLng TW = new LatLng(25.0248956,121.5428653);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(TW));
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(10f));
         new Thread(new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
@@ -440,7 +466,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             @Override
             public void onMapClick(LatLng latLng) {
                 if (isChoosingLocation) {
-                    if (tmpMarker != null) {
+                    if (tmpMarker!=null) {
                         tmpMarker.remove();
                     }
                     placeName = Server.getPlaceName(latLng);
@@ -474,6 +500,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 if (isChoosingLocation) {
                     Log.e("marker", "isChoosing");
                     chosenLocation = marker.getPosition();
+                    editLocation.setText(marker.getTitle());
+                    placeName = marker.getTitle();
+                    hasChosen = true;
                     return false;
                 }
                 if (marker == tmpMarker) {

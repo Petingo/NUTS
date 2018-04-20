@@ -34,17 +34,30 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/openMap"
+        android:layout_width="256dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/button_background_green"
+        android:text="在地圖上顯示"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/resultPlace" />
+
+    <Button
         android:id="@+id/randomAgain"
         android:layout_width="256dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/button_background"
         android:text="再抽一次"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/resultPlace" />
+        app:layout_constraintTop_toBottomOf="@+id/openMap" />
 
     <Button
         android:id="@+id/backToSelect"

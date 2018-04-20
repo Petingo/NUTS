@@ -63,7 +63,7 @@ public class TagInfoListAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.tag_info_list_item, null);
             ImageButton agree = (ImageButton) convertView.findViewById(R.id.imageButtonAgree);
-            ImageButton disagree = (ImageButton) convertView.findViewById(R.id.imageButtonAgree);
+            ImageButton disagree = (ImageButton) convertView.findViewById(R.id.imageButtonDisagree);
             final View finalConvertView = convertView;
             agree.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -103,7 +103,7 @@ public class TagInfoListAdapter extends BaseAdapter {
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("user_id", "1111");
-            jsonObject.put("id", id);
+            jsonObject.put("event_id", id);
             jsonObject.put("like", like);
             jsonObject.put("dislike", like==1 ? 0:1);
             Server.post("/map/change_comment",jsonObject);
@@ -112,7 +112,7 @@ public class TagInfoListAdapter extends BaseAdapter {
         }
     }
     public void addNum(TextView tv) {
-        tv.setText(Integer.valueOf(tv.getText().toString()) + 1);
+        tv.setText(String.valueOf(Integer.valueOf(tv.getText().toString()) + 1));
     }
     
 }

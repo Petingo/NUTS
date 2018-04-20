@@ -3,6 +3,8 @@ package com.nuts.nuts;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
@@ -32,7 +34,7 @@ public class LotteryFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Pair<String, String> result = adapter.getRandomResult();
-                String restaurant = result.second;
+                final String restaurant = result.second;
                 String place = result.first;
                 if(restaurant == null){
                     Toast.makeText(getContext(), "至少選一間啦 (´・ω・`)", Toast.LENGTH_SHORT).show();
@@ -45,9 +47,18 @@ public class LotteryFragment extends Fragment {
                     final TextView resultPlace = dialogView.findViewById(R.id.resultPlace);
                     resultRestaurant.setText(restaurant);
                     resultPlace.setText(place);
-
+                    Button openMap = dialogView.findViewById(R.id.openMap);
                     Button randomAgain = dialogView.findViewById(R.id.randomAgain);
                     Button backToSelect = dialogView.findViewById(R.id.backToSelect);
+                    openMap.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + restaurant);
+                            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                            mapIntent.setPackage("com.google.android.apps.maps");
+                            startActivity(mapIntent);
+                        }
+                    });
                     randomAgain.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -58,6 +69,7 @@ public class LotteryFragment extends Fragment {
                             resultPlace.setText(place);
                         }
                     });
+
                     backToSelect.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {

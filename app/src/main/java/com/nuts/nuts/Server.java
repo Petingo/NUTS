@@ -2,6 +2,7 @@ package com.nuts.nuts;
 /* Created by petingo on 2018/3/14. */
 
 import android.content.SharedPreferences;
+import android.os.CountDownTimer;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -11,9 +12,12 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -23,7 +27,36 @@ import java.util.concurrent.CountDownLatch;
 import javax.xml.transform.Result;
 
 public class Server {
-    private static final String ip = "http://nutsapp.herokuapp.com";
+    private static final String ip = "http://" + MainActivity.pref.getString("ip", "petingo.ddns.net:8000");
+
+    public static String get_d(final String app) {
+
+        try {
+            URL url = new URL(ip + app);
+            Log.e("URL", url.toString());
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            int statusCode = conn.getResponseCode();
+            Log.e("statusCode", String.valueOf(statusCode));
+            if (statusCode == 200) {
+                InputStream it = new BufferedInputStream(conn.getInputStream());
+                InputStreamReader read = new InputStreamReader(it);
+                BufferedReader buff = new BufferedReader(read);
+                StringBuilder rawData = new StringBuilder();
+                String chunks;
+                while ((chunks = buff.readLine()) != null) {
+                    rawData.append(chunks);
+                }
+                Log.e("rawData", rawData.toString());
+                return rawData.toString();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        return null;
+    }
 
     public static String get(final String app) {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -33,10 +66,9 @@ public class Server {
             public void run() {
                 try {
                     URL url = new URL(ip + app);
+                    Log.e("URL", url.toString());
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
-                    conn.setConnectTimeout(2000);
-                    conn.setReadTimeout(2000);
                     int statusCode = conn.getResponseCode();
                     Log.e("statusCode", String.valueOf(statusCode));
                     if (statusCode == 200) {
@@ -48,7 +80,7 @@ public class Server {
                         while ((chunks = buff.readLine()) != null) {
                             rawData.append(chunks);
                         }
-                        Log.e("rawData",rawData.toString());
+                        Log.e("rawData", rawData.toString());
                         data[0] = rawData.toString();
                         latch.countDown();
                     } else {
@@ -61,6 +93,16 @@ public class Server {
             }
         });
         try {
+            new CountDownTimer(3000, 1000) {
+                @Override
+                public void onFinish() {
+                    latch.countDown();
+                }
+
+                @Override
+                public void onTick(long millisUntilFinished) {
+                }
+            }.start();
             thread.start();
             latch.await();
             return data[0];
@@ -85,11 +127,14 @@ public class Server {
                     conn.setConnectTimeout(2000);
                     conn.setReadTimeout(2000);
 
-                    DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-                    os.writeBytes(jsonParam.toString());
+                    Writer writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream(), "UTF-8"));
+                    writer.write(jsonParam.toString());
+                    writer.close();
 
-                    os.flush();
-                    os.close();
+//                    DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+//                    os.writeBytes(jsonParam.toString().getBytes().toString());
+//                    os.flush();
+//                    os.close();
 
                     Log.e("app", app);
                     Log.e("STATUS", String.valueOf(conn.getResponseCode()));

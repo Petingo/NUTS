@@ -31,6 +31,10 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+        startActivity(intent);
+
+
         pref = getSharedPreferences(getPackageName(), MODE_PRIVATE);
 
         showAskWeatherDialog();
@@ -48,9 +52,6 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navHeader = navigationView.getHeaderView(0);
         initNavHead();
-
-        Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-        startActivity(intent);
 
         try {
             Fragment fragment = null;
