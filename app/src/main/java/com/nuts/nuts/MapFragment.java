@@ -524,9 +524,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                Log.e("updateMarkers","start");
-                updateMarkers();
-                handler.postDelayed(this, interval);
+                if(MainActivity.fragmentNow == 1) {
+                    Log.e("updateMarkers", "start");
+                    updateMarkers();
+                    handler.postDelayed(this, interval);
+                }
             }
         };
         handler.postDelayed(runnable, interval);

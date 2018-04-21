@@ -25,6 +25,7 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     public static SharedPreferences pref;
+    public static int fragmentNow;
     private View navHeader;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity
             fragment = (Fragment) MapFragment.class.newInstance();
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
-
+            fragmentNow = 1;
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -134,15 +135,19 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         switch (id){
             case R.id.nav_school:
+                fragmentNow = 1;
                 fragmentClass = MapFragment.class;
                 break;
             case R.id.nav_lottery:
+                fragmentNow = 2;
                 fragmentClass = LotteryFragment.class;
                 break;
             case R.id.nav_ptt_hot:
+                fragmentNow = 3;
                 fragmentClass = PTTFragment.class;
                 break;
             default:
+                fragmentNow = 1;
                 fragmentClass = MapFragment.class;
                 break;
         }
