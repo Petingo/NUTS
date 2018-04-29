@@ -475,8 +475,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                     mAnimateManager.nextStep(top, layoutDefault);
                     top = null;
                 }
-
-                Toast.makeText(getActivity(), "Lat: " + latLng.latitude + " Lng: " + latLng.longitude, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), "Lat: " + latLng.latitude + " Lng: " + latLng.longitude, Toast.LENGTH_SHORT).show();
             }
         });
 
