@@ -10,6 +10,7 @@ import java.lang.annotation.AnnotationTypeMismatchException;
 
 public class AnimateManager {
     private Context context;
+
     Animation slideDown;
     Animation slideUp;
     Animation slideLeftAppear;
@@ -27,6 +28,8 @@ public class AnimateManager {
         slideRightDisappear = AnimationUtils.loadAnimation(this.context, R.anim.slide_right_disappear);
 
     }
+    // A go down and GONE,
+    // B come in from top
     void nextStep(View A, View B){
         if(A != null) {
             A.startAnimation(slideDown);
@@ -37,6 +40,8 @@ public class AnimateManager {
             B.startAnimation(slideUp);
         }
     }
+    // A go left and GONE,
+    // B come in from right
     void leftSlide(View A, View B){
         if(A != null) {
             A.startAnimation(slideLeftDisappear);
@@ -47,6 +52,8 @@ public class AnimateManager {
             B.startAnimation(slideLeftAppear);
         }
     }
+    // A go right and GONE,
+    // B come in from left
     void rightSlide(View A, View B){
         if(A != null) {
             A.startAnimation(slideRightDisappear);

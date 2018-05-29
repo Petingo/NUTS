@@ -63,38 +63,48 @@ import java.util.Arrays;
 public class MapFragment extends Fragment implements OnMapReadyCallback{
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mMap;
+
     private FusedLocationProviderClient mFusedLocationClient;
+
     private ConstraintLayout layoutEditMarker;
     private ConstraintLayout layoutTagInfo;
     private ConstraintLayout layoutDefault;
     private ConstraintLayout layoutTagCategory;
+
     private FloatingActionButton addTag;
     private FloatingActionButton tagRoad;
     private FloatingActionButton tagActivity;
     private FloatingActionButton tagRestaurant;
     private FloatingActionButton tagOther;
+
     private ImageView cancel;
     private ImageView done;
     private ImageView chooseLocation;
     private ImageView weatherIcon;
+
     private com.getbase.floatingactionbutton.FloatingActionButton toMyPlace;
     private com.getbase.floatingactionbutton.FloatingActionButton toNTNU;
     private com.getbase.floatingactionbutton.FloatingActionButton toNTU;
     private com.getbase.floatingactionbutton.FloatingActionButton toNTUST;
+
     private TextView tagInfoTitle;
     private TextView editMarkerPlaceName;
     private TextView weather;
     private TextView weatherPlace;
+
     private EditText editTagTitle;
     private EditText editLocation;
+
     private AnimateManager mAnimateManager;
+
     private View top;
 
     private Marker tmpMarker;
 
     private boolean isChoosingLocation = false;
-    private LatLng chosenLocation;
     private boolean hasChosen = false;
+
+    private LatLng chosenLocation;
 
     private int backSituation = 0;
     private final int BACK_NORMAL = 0;
@@ -103,6 +113,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION = 1;
 
     private String placeName;
+
     Context context;
 
     private ArrayList<TagInfo> tagInfoArrayList;
@@ -120,27 +131,36 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         mAnimateManager = new AnimateManager(context);
 
         addTag = view.findViewById(R.id.buttonAddTag);
+
         tagRoad = view.findViewById(R.id.buttonTagRoad);
         tagActivity = view.findViewById(R.id.buttonTagActivity);
         tagRestaurant = view.findViewById(R.id.buttonTagRestaurant);
         tagOther = view.findViewById(R.id.buttonTagOther);
+
         layoutEditMarker = view.findViewById(R.id.layoutEditMarker);
         layoutTagCategory = view.findViewById(R.id.layoutTagCategory);
         layoutTagInfo = view.findViewById(R.id.layoutTagInfo);
         layoutDefault = view.findViewById(R.id.layoutDefault);
+
         cancel = view.findViewById(R.id.imageCancel);
         done = view.findViewById(R.id.imageDone);
+
         chooseLocation = view.findViewById(R.id.chooseLocation);
+
         editTagTitle = view.findViewById(R.id.editTagTitle);
         editLocation = view.findViewById(R.id.editLocation);
         editMarkerPlaceName = view.findViewById(R.id.editMarkerPlaceName);
+
         tagInfoTitle = view.findViewById(R.id.textTagInfoTitle);
+
         weather = view.findViewById(R.id.textWeather);
         weatherPlace = view.findViewById(R.id.textWeatherPlace);
+
         toMyPlace = view.findViewById(R.id.toMyPlace);
         toNTNU = view.findViewById(R.id.toNTNU);
         toNTUST = view.findViewById(R.id.toNTUST);
         toNTU = view.findViewById(R.id.toNTU);
+
         weatherIcon = view.findViewById(R.id.weatherIcon);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
@@ -204,18 +224,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 top = layoutDefault;
             }
         });
+
         done.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // add an event and post to server
                 try {
                     JSONObject tagInfo = new JSONObject();
                     tagInfo.put("title",editTagTitle.getText().toString());
-                    Log.e("converted Title", tagInfo.getString("title"));
                     tagInfo.put("coor_x", chosenLocation.longitude);
                     tagInfo.put("coor_y", chosenLocation.latitude);
-                    Log.e("title", editTagTitle.getText().toString());
-                    Log.e("x", String.valueOf(chosenLocation.longitude));
-                    Log.e("x", String.valueOf(chosenLocation.latitude));
+//                    Log.e("converted Title", tagInfo.getString("title"));
+//                    Log.e("title", editTagTitle.getText().toString());
+//                    Log.e("x", String.valueOf(chosenLocation.longitude));
+//                    Log.e("x", String.valueOf(chosenLocation.latitude));
                     Server.post("/map/event", tagInfo);
                     new CountDownTimer(1000, 1000) {
                         @Override
@@ -234,6 +256,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             }
         });
 
+        // override the back button
+        // or the UX would be terrible
         view.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -254,6 +278,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         });
     }
 
+    // when choosed one of the 4 tag category, animate
     private void categoryClick(){
         if (hasChosen) {
             mAnimateManager.nextStep(layoutTagCategory, layoutEditMarker);
@@ -268,18 +293,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         }
     }
 
+    // TODO
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void updateWeather() {
         weatherIcon.setImageBitmap(util.getBitmap(context, R.drawable.ic_cloud));
+
         String result = Server.get("/weather/get");
-//        String result = new ServerGet.execute(); execute("/weather/get");
+
         if (result != null) {
             String temperature = "24";
             String degree = "℃";
             SpannableString ssTemperature = new SpannableString(temperature);
             SpannableString ssDegree = new SpannableString(degree);
             ssDegree.setSpan(new RelativeSizeSpan(0.5f), 0, 1, 0);
+
             final CharSequence finalText = TextUtils.concat(ssTemperature, " ", ssDegree);
+
             weather.post(new Runnable() {
                 @Override
                 public void run() {
@@ -305,6 +334,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         }
     }
 
+    // get all data from server and render the map
+    // TODO : change to call back
     private void updateMarkers() {
         new Thread(new Runnable() {
             @Override
@@ -314,20 +345,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 try {
                     String rawData = Server.get("/map/dump");
                     if (rawData != null) {
+
                         for (int i = 0; i < markerArrayList.size(); i++) {
                             Log.e("remove", markerArrayList.get(i).getTitle());
                             markerArrayList.get(i).remove();
                         }
+
                         for(int i = 0 ; i< tagInfoArrayList.size();i++){
                             tagInfoArrayList.clear();
                         }
+
                         markerArrayList.clear();
                         mMap.clear();
+
                         JSONArray markersData = new JSONArray(rawData);
+
                         for (int i = 0; i < markersData.length(); i++) {
                             JSONObject data = markersData.getJSONObject(i);
                             JSONArray eventsData = data.getJSONArray("events");
                             ArrayList<TagInfoEvent> events = new ArrayList<>();
+
                             for (int k = 0; k < eventsData.length(); k++) {
                                 JSONObject eventData = eventsData.getJSONObject(k);
                                 int id = eventData.getInt("id");
@@ -335,6 +372,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                                 String time = eventData.getString("time");
                                 int agreeNum = eventData.getInt("num_like");
                                 int disagreeNum = eventData.getInt("num_dislike");
+
                                 events.add(new TagInfoEvent(id, title, time, agreeNum, disagreeNum));
                             }
 
@@ -377,6 +415,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             showAccessFineLocationPermission();
             return;
         }
+
         Log.e("now", "setMyLocation");
         mMap.setMyLocationEnabled(true);
         mFusedLocationClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {

@@ -24,8 +24,10 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
     public static SharedPreferences pref;
     public static int fragmentNow;
+
     private View navHeader;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +36,6 @@ public class MainActivity extends AppCompatActivity
 
         Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
         startActivity(intent);
-
 
         pref = getSharedPreferences(getPackageName(), MODE_PRIVATE);
 
@@ -73,14 +74,18 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, 1);
             }
         });
-        TextView drawerNickName = (TextView) navHeader.findViewById(R.id.drawerNickName);
+
+        // check guest or student
         String identity = pref.getString("identity","訪客");
         if(identity.equals("guest")){
             identity = "訪客";
         } else {
             identity = "學生";
         }
+
+        TextView drawerNickName = (TextView) navHeader.findViewById(R.id.drawerNickName);
         drawerNickName.setText(identity);
+
         TextView drawerEmail = (TextView) navHeader.findViewById(R.id.editMarkerPlaceName);
         drawerEmail.setText(pref.getString("account","guest"));
     }
